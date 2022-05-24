@@ -18,16 +18,17 @@ def scrap():
 
         for company in companies[:3]:
             # print(company.prettify())
-            name = company.find('p', class_='deno')
+            name = company.find('p', class_='deno').text.strip()
             infos = company.find_all('p', class_="txt")
-            print('NAME:', name.text.strip())
-            print('COMPANY STATUS: ACTIVE')
-            print('REGISTRED AS:', infos[1].text.strip().split(':')[1])
+            registred_as = infos[1].text.split(':')[-1].strip()
             adress_line = infos[2].text.strip()
-            print('LEGAL ADDRESS LINE:', adress_line)
-            print('LEGAL ADDRESS POSTAL CODE:', adress_line.split(' ')[0])
-            print('LEGAL ADDRESS CITY:', adress_line.split(' ')[1])
+            adr_arr = adress_line.split(' ')
+            postal_code = adr_arr[0]
+            city = " ".join(adr_arr[1:])
 
+            json = {"name": name, "status": "active", "registred_as": registred_as, "adress_line": adress_line,
+                    "postal_code": postal_code, "city": city}
+            print(json)
             print('===============================')
 
     else:
@@ -35,4 +36,4 @@ def scrap():
 
 
 if __name__ == '__main__':
-    print(scrap())
+    scrap()
