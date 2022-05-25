@@ -4,8 +4,12 @@ import requests
 url_1 = "https://www.societe.com/cgi-bin/search?champs=cartan"
 # url_2 = "https://find-and-update.company-information.service.gov.uk/search/companies?q=cartan"
 url_2 = "https://find-and-update.company-information.service.gov.uk/search?q=CARPANINI+INTERNATIONALE+ART+DEALERSHIP+LIMITED"
+url_3 = "https://italy.globaldatabase.com/filter/company?name=cisco"
+
+url_4 = "https://data.gov.sg/api/action/datastore_search?resource_id=5ab68aac-91f6-4f39-9b21-698610bdf3f7&q=ARKEMA"
 
 
+# France
 def scrap_1():
     response = requests.get(url_1, headers={'User-agent': 'Super Bot Power Level Over 9000'})
     if response.status_code == 200:
@@ -37,6 +41,7 @@ def scrap_1():
         return 'THROW EXCPETION HERE'
 
 
+# UK
 def scrap_2():
     response = requests.get(url_2, headers={'User-agent': 'Super Bot Power Level Over 9000'})
     if response.status_code == 200:
@@ -78,6 +83,41 @@ def scrap_2():
         return 'THROW EXCPETION HERE'
 
 
+# Italy
+def scrap_3():
+    response = requests.get(url_3, headers={'User-agent': 'Super Bot Power Level Over 9000'})
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'lxml')
+        result_search = soup.find('ul', id="results-list-companies")
+
+        if result_search is None:
+            return 'Aucun résultat trouvé'
+
+        companies = result_search.findChildren("li", recursive=False)
+
+        for company in companies[:3]:
+            title = company.find('div', class_='title')
+            name = title.h1.a.text.strip()
+            status = title.span.text.strip()
+
+            tables = company.find('div', class_="company-info-block").findChildren('table')
+            registred_as = tables[0].find_all('tr')[1].text.strip()
+
+            city = tables[3].find_all('tr')[3].text.strip()
+
+            json = {"name": name, "status": status, "registred_as": registred_as, "city": city}
+            print(json)
+            print('===============================')
+
+    else:
+        return 'THROW EXCPETION HERE'
+
+
+
+
+
 if __name__ == '__main__':
     # scrap_1()
-    scrap_2()
+    # scrap_2()
+    # scrap_3()
+    scrap_4()
