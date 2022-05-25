@@ -113,7 +113,25 @@ def scrap_3():
         return 'THROW EXCPETION HERE'
 
 
+# Singapore
+def scrap_4():
+    response = requests.get(url_4)
+    if response.status_code == 200:
+        companies = response.json()['result']['records']
 
+        if len(companies) == 0:
+            return 'Aucun résultat trouvé'
+
+        for company in companies[:3]:
+            status = "Active" if company['uen_status'] == "R" else ("Inactive" if company['uen_status'] == "D" else "Not available")
+            json = {"name": company['entity_name'], "status": status, "registred_as": company['uen'],
+                    "adress_line": company['reg_street_name'], "postal_code": company['reg_postal_code'],
+                    "city": 'Singapore', "created_at": company['uen_issue_date']}
+            print(json)
+            print('===============================')
+
+    else:
+        return 'THROW EXCPETION HERE'
 
 
 if __name__ == '__main__':
