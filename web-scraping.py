@@ -2,7 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 
 url_1 = "https://www.societe.com/cgi-bin/search?champs=cartan"
-url_2 = "https://find-and-update.company-information.service.gov.uk/search/companies?q=cartan"
+# url_2 = "https://find-and-update.company-information.service.gov.uk/search/companies?q=cartan"
+url_2 = "https://find-and-update.company-information.service.gov.uk/search?q=CARPANINI+INTERNATIONALE+ART+DEALERSHIP+LIMITED"
 
 
 def scrap_1():
@@ -47,19 +48,29 @@ def scrap_2():
 
         result = soup.find('ul', id='results')
         companies = result.findChildren("li", recursive=False)
+
         for company in companies[:3]:
             name = company.a.text.strip()
-
-            national_date = company.find('p', class_='meta').text
+            # print(company.prettify())
+            national_date = company.find('p', class_="meta crumbtrail").text
+            # print(national_date)
             registred_as = national_date.split('-')[0].strip()
 
             full_date = national_date.split('-')[-1]
-            date = full_date.replace('Incorporated on', '').replace('Dissolved on', '').strip()
+            date = ''
+            status = ''
+            if 'Dissolved on' in full_date:
+                status = 'Inactive'
+            elif 'Incorporated on' in full_date:
+                status = 'Active'
+                date = full_date.replace('Incorporated on', '').strip()
 
-            adress_line = company.find_all('p')[-1].text.strip()
+            adress_line = company.find('p', class_ = None).text.strip()
+
             postal_code = adress_line.split(',')[-1].strip()
-            json = {"name": name, "status": "active", "registred_as": registred_as, 'created_at': date,
+            json = {"name": name, "status": status, "registred_as": registred_as, 'created_at': date,
                     "adress_line": adress_line, "postal_code": postal_code}
+
             print(json)
             print('===============================')
 
