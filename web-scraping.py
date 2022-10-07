@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
 
-url_1 = "https://www.societe.com/cgi-bin/search?champs=cartan"
+url_1 = "https://www.societe.com/cgi-bin/search?champs=PALVADEAU+CONSTRUCTIONS+SARL"
+# url_1 = "https://www.societe.com/cgi-bin/search?champs=cartan"
 # url_2 = "https://find-and-update.company-information.service.gov.uk/search/companies?q=cartan"
 url_2 = "https://find-and-update.company-information.service.gov.uk/search?q=CARPANINI+INTERNATIONALE+ART+DEALERSHIP+LIMITED"
 url_3 = "https://italy.globaldatabase.com/filter/company?name=cisco"
@@ -14,15 +15,19 @@ def scrap_1():
     response = requests.get(url_1, headers={'User-agent': 'Super Bot Power Level Over 9000'})
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'lxml')
+        # print('SOUP', soup)
         result_search = soup.find('div', id='search')
 
+        # print("result_search", result_search)
         if result_search is None:
+            print('WALO')
             return 'Aucun résultat trouvé'
 
         soup.find('div', id="result_doc").decompose()
         companies = soup.find_all('div', class_='ResultBloc__link')
-
+        print(len(companies))
         for company in companies[:3]:
+            print('AAAAAAAAAAAAAAAAAAAAA')
             # print(company.prettify())
             name = company.find('p', class_='deno').text.strip()
             infos = company.find_all('p', class_="txt")
@@ -70,7 +75,7 @@ def scrap_2():
                 status = 'Active'
                 date = full_date.replace('Incorporated on', '').strip()
 
-            adress_line = company.find('p', class_ = None).text.strip()
+            adress_line = company.find('p', class_=None).text.strip()
 
             postal_code = adress_line.split(',')[-1].strip()
             json = {"name": name, "status": status, "registred_as": registred_as, 'created_at': date,
@@ -85,29 +90,32 @@ def scrap_2():
 
 # Italy
 def scrap_3():
-    response = requests.get(url_3, headers={'User-agent': 'Super Bot Power Level Over 9000'})
+    response = requests.get("https://italy.globaldatabase.com/filter/company?name=cisco",
+                            headers={'User-agent': 'Super Bot Power Level Over 9000'})
     if response.status_code == 200:
+        # print(response.text)
         soup = BeautifulSoup(response.text, 'lxml')
-        result_search = soup.find('ul', id="results-list-companies")
-
-        if result_search is None:
-            return 'Aucun résultat trouvé'
-
-        companies = result_search.findChildren("li", recursive=False)
-
-        for company in companies[:3]:
-            title = company.find('div', class_='title')
-            name = title.h1.a.text.strip()
-            status = title.span.text.strip()
-
-            tables = company.find('div', class_="company-info-block").findChildren('table')
-            registred_as = tables[0].find_all('tr')[1].text.strip()
-
-            city = tables[3].find_all('tr')[3].text.strip()
-
-            json = {"name": name, "status": status, "registred_as": registred_as, "city": city}
-            print(json)
-            print('===============================')
+        print(soup)
+        # result_search = soup.find('ul', id="results-list-companies")
+        #
+        # if result_search is None:
+        #     return 'Aucun résultat trouvé'
+        #
+        # companies = result_search.findChildren("li", recursive=False)
+        #
+        # for company in companies[:3]:
+        #     title = company.find('div', class_='title')
+        #     name = title.h1.a.text.strip()
+        #     status = title.span.text.strip()
+        #
+        #     tables = company.find('div', class_="company-info-block").findChildren('table')
+        #     registred_as = tables[0].find_all('tr')[1].text.strip()
+        #
+        #     city = tables[3].find_all('tr')[3].text.strip()
+        #
+        #     json = {"name": name, "status": status, "registred_as": registred_as, "city": city}
+        #     print(json)
+        #     print('===============================')
 
     else:
         return 'THROW EXCPETION HERE'
@@ -123,7 +131,8 @@ def scrap_4():
             return 'Aucun résultat trouvé'
 
         for company in companies[:3]:
-            status = "Active" if company['uen_status'] == "R" else ("Inactive" if company['uen_status'] == "D" else "Not available")
+            status = "Active" if company['uen_status'] == "R" else (
+                "Inactive" if company['uen_status'] == "D" else "Not available")
             json = {"name": company['entity_name'], "status": status, "registred_as": company['uen'],
                     "adress_line": company['reg_street_name'], "postal_code": company['reg_postal_code'],
                     "city": 'Singapore', "created_at": company['uen_issue_date']}
@@ -134,8 +143,33 @@ def scrap_4():
         return 'THROW EXCPETION HERE'
 
 
+def online_handelsregister():
+    url = "https://www.online-handelsregister.de/suche/CENTRICA+LNG"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'lxml')
+        search_result = soup.find('div', class_="searchresults")
+        if search_result is not None:
+            results = search_result.find_all('a', href=True)
+
+            for a in results[:3]:
+                print(a['href'])
+                companies = a.find_all('div', class_='col-md-10')
+                for company in companies[:1]:
+                    # print(company.prettify())
+                    name = company.contents[0].strip()
+                    small = company.contents[2].text
+                    lega_adress_city, registredAs = small.split(' • ')
+                    print(f'Name : {name}, address : {lega_adress_city}, registredAs : {registredAs}')
+
+                    # url_details = f"https://www.online-handelsregister.de/handelsregisterauszug/nw/${lega_adress_city}/HRB/19385/${name}"
+                print("******************")
+
+
 if __name__ == '__main__':
     # scrap_1()
-    # scrap_2()
-    # scrap_3()
-    scrap_4()
+    # # scrap_2()
+    # # scrap_3()
+    # # scrap_4()
+    online_handelsregister()

@@ -55,7 +55,7 @@ def json_pappers():
         df_papers = pd.json_normalize(data)
         df_papers['credit_safe_id'] = 'FR-X-' + df_papers['siege.siret']
         # df_papers.to_excel('res_final.xlsx', index=""false"")
-        add_new_sheet('./resultat.xlsx', df_papers, name)
+        add_new_sheet('../resultat.xlsx', df_papers, name)
         del df_papers
 
 
@@ -73,7 +73,7 @@ def add_new_sheet(path, df, sheet_name):
 
 
 def flatt_credit_safe():
-    file = open("./credit_safe.json", encoding="utf8")
+    file = open("../credit_safe.json", encoding="utf8")
     data = json.load(file)
     df = pd.json_normalize(data, record_path="activityClassifications")
     df.to_excel('credit_safe_flatten.xlsx', index=False)
@@ -87,8 +87,8 @@ def get_credit_safe_data():
     df = pd.read_excel('input_credit_safe_3.xlsx', index=False)
     df.apply(lambda row: credit_safe_processing_detail(row, found, not_found), axis=1)
 
-    store_json_file("found.json", found)
-    store_json_file("not_found.json", not_found)
+    store_json_file("../found.json", found)
+    store_json_file("../not_found.json", not_found)
 
 
 def credit_safe_processing_detail(row, found, not_found):
